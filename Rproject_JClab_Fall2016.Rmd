@@ -1,0 +1,73 @@
+---
+title: "R_project_JClab_Fall2016"
+author: "ITG, JL"
+date: "December 3, 2016"
+output: html_document
+---
+##Sidenote
+This document will record the progress and scripts used to analyze growth curve data from our research lab.
+
+##Materials: Raw data from spectrophotometer
+Spectrophotometer provided .xlsx files for raw data. Datasheets were converted to .csv and .txt for analysis in Rstudio.
+One 96-well plate named "161011 Rm1021 jspA kinetic A600 HTX linear edited.xlsx" containing four replicates of data.
+File was converted to .csv for analysis in R.
+Data was seperated depending on genotypes expressed.
+##Methods: Plotting growth curves on Rstudio with ggplot2
+Install packages for analysis
+```{r}
+install.packages('ggplot2')
+library(ggplot2)
+```
+Save .csv files as variable.
+```{r}
+csv_161011_vectors<-read.csv("csv_161011 Rm1021 jspA kinetic A600 HTX linear edited_vector.csv")
+csv_161011_jspA<-read.csv("csv_161011 Rm1021 jspA kinetic A600 HTX linear edited_jspA.csv")
+csv_161011_jspA_E148A<-read.csv("csv_161011 Rm1021 jspA kinetic A600 HTX linear edited_jspA E148A.csv")
+csv_161011_jspA_E148A_HA<-read.csv("csv_161011 Rm1021 jspA kinetic A600 HTX linear edited_jspA E148A-HA.csv")
+csv_161011_jspA_HA<-read.csv("csv_161011 Rm1021 jspA kinetic A600 HTX linear edited_jspA-HA.csv")
+```
+Plot data on to graphs for visualization. 
+```{r}
+vector_ggplot <- ggplot(csv_161011_vectors, aes(x = Time, y = OD, color=Genotype)) + geom_point(size=1) + labs(x= "Time(minutes)", y= "OD600") + ggtitle("OD vs Time: Vector") + ylim (0,0.35)
+jspA_ggplot <- ggplot(csv_161011_jspA, aes(x = Time, y = OD, color=Genotypes)) + geom_point(size=1) + labs(x= "Time(minutes)", y= "OD600") + ggtitle("OD vs Time: jspA overexpression") + ylim (0,0.35)
+jspA_E148A_ggplot <- ggplot(csv_161011_jspA_E148A, aes(x = Time, y = OD, color=Genotypes)) + geom_point(size=1) + labs(x= "Time(minutes)", y= "OD600") + ggtitle("OD vs Time: jspA(E148A) overexpression") + ylim (0,0.35)
+jspA_E148A_HA_ggplot <- ggplot(csv_161011_jspA_E148A_HA, aes(x = Time, y = OD, color=Genotypes)) + geom_point(size=1) + labs(x= "Time(minutes)", y= "OD600") + ggtitle("OD vs Time: jspA(E148A)-HA overexpression") + ylim (0,0.35)
+jspA_HA_ggplot <- ggplot(csv_161011_jspA_HA, aes(x = Time, y = OD, color=Genotypes)) + geom_point(size=1) + labs(x= "Time(minutes)", y= "OD600") + ggtitle("OD vs Time: jspA-HA overexpression") + ylim (0,0.35)
+```
+Subset data for exponential growth phase.
+```{r}
+csv_161011_vector_subset <- subset(csv_161011_vectors, Time >= 300 & Time <= 1000, select = c(Time, OD, Genotype))
+csv_161011_jspA_subset <- subset(csv_161011_jspA, Time >= 300 & Time <= 1000, select = c(Time, OD, Genotypes))
+csv_161011_jspA_E148A_subset <- subset(csv_161011_jspA_E148A, Time >= 300 & Time <= 1000, select = c(Time, OD, Genotypes))
+csv_161011_jspA_HA_subset <- subset(csv_161011_jspA_HA, Time >= 300 & Time <= 1000, select = c(Time, OD, Genotypes))
+csv_161011_jspA_E148A_HA_subset <- subset(csv_161011_jspA_E148A_HA, Time >= 300 & Time <= 1000, select = c(Time, OD, Genotypes))
+```
+Create ggplot graphs of subsetted data.
+```{r}
+vector_ggplot_subset <- ggplot(csv_161011_vector_subset, aes(x = Time, y = OD, color=Genotype)) + geom_point(size=1) + labs(x= "Time(minutes)", y= "OD600") + ggtitle("OD vs Time: Vector") + ylim (0,0.35)
+jspA_ggplot_subset <- ggplot(csv_161011_jspA_subset, aes(x = Time, y = OD, color=Genotypes)) + geom_point(size=1) + labs(x= "Time(minutes)", y= "OD600") + ggtitle("OD vs Time: jspA overexpression") + ylim (0,0.35)
+jspA_E148A_ggplot_subset <- ggplot(csv_161011_jspA_E148A_subset, aes(x = Time, y = OD, color=Genotypes)) + geom_point(size=1) + labs(x= "Time(minutes)", y= "OD600") + ggtitle("OD vs Time: jspA(E148A) overexpression") + ylim (0,0.35)
+jspA_HA_ggplot_subset <- ggplot(csv_161011_jspA_HA_subset, aes(x = Time, y = OD, color=Genotypes)) + geom_point(size=1) + labs(x= "Time(minutes)", y= "OD600") + ggtitle("OD vs Time: jspA-HA overexpression") + ylim (0,0.35)
+jspA_E148A_HA_ggplot_subset <- ggplot(csv_161011_jspA_E148A_HA_subset, aes(x = Time, y = OD, color=Genotypes)) + geom_point(size=1) + labs(x= "Time(minutes)", y= "OD600") + ggtitle("OD vs Time: jspA(E148A)-HA overexpression") + ylim (0,0.35)
+```
+Create new column for log growth.
+```{r}
+csv_161011_vector_subset["log(OD)"] <- log(csv_161011_vector_subset$OD)
+csv_161011_jspA_subset["log(OD)"] <- log(csv_161011_jspA_subset$OD)
+csv_161011_jspA_E148A_subset["log(OD)"] <- log(csv_161011_jspA_E148A_subset$OD)
+csv_161011_jspA_HA_subset["log(OD)"] <- log(csv_161011_jspA_HA_subset$OD)
+csv_161011_jspA_E148A_HA_subset["log(OD)"] <- log(csv_161011_jspA_E148A_HA_subset$OD)
+```
+Graph log(OD) versus time
+```{r}
+log_vector_ggplot_subset <- ggplot(csv_161011_vector_subset, aes(x = Time, y = log(OD), color=Genotype)) + geom_point(size=1) + labs(x= "Time(minutes)", y= "log(OD600)") + ggtitle("log(OD) vs Time: Vector")
+log_jspA_ggplot_subset <- ggplot(csv_161011_jspA_subset, aes(x = Time, y = log(OD), color=Genotypes)) + geom_point(size=1) + labs(x= "Time(minutes)", y= "log(OD600)") + ggtitle("log(OD) vs Time: jspA overexpression")
+log_jspA_E148A_ggplot_subset <- ggplot(csv_161011_jspA_E148A_subset, aes(x = Time, y = log(OD), color=Genotypes)) + geom_point(size=1) + labs(x= "Time(minutes)", y= "log(OD600)") + ggtitle("log(OD) vs Time: jspA(E148A) overexpression")
+log_jspA_HA_ggplot_subset <- ggplot(csv_161011_jspA_HA_subset, aes(x = Time, y = log(OD), color=Genotypes)) + geom_point(size=1) + labs(x= "Time(minutes)", y= "log(OD600)") + ggtitle("log(OD) vs Time: jspA-HA overexpression")
+log_jspA_E148A_HA_ggplot_subset <- ggplot(csv_161011_jspA_E148A_HA_subset, aes(x = Time, y = log(OD), color=Genotypes)) + geom_point(size=1) + labs(x= "Time(minutes)", y= "log(OD600)") + ggtitle("log(OD) vs Time: jspA(E148A)-HA overexpression")
+```
+Find intercept and slope and add trendline to ggplot graph
+```{r}
+coef(lm(log(OD) ~ Time, data = csv_161011_vector_subset))
+log_vector_ggplot_subset + geom_abline(intercept = -2.617028066, slope = 0.001556344)
+```
